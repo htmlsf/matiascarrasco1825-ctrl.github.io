@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>Te Amo Sofi ❤️ – Lluvia de Amor</title>
+  <style>
+    :root{
+      --bg:#0a0a0a;
+      --fg:#ffd1dc;
+      --accent1:#ff4d6d;
+      --accent2:#ff758f;
+      --accent3:#ffb3c1;
+      --accent4:#ffecf1;
+      --glow: 0 0 25px rgba(255, 91, 126, .7);
+    }
+    html,body{height:100%; margin:0; padding:0; overflow:hidden;}
+    body{
+      background: radial-gradient(circle at top, #1a1a2e, #0a0a0a);
+      color:var(--fg);
+      font-family: "Poppins", system-ui, sans-serif;
+      position:relative;
+      height:100%;
+    }
+
+    /* Fondo con estrellitas */
+    body::before {
+      content:"";
+      position:fixed; inset:0;
+      background: transparent url("https://www.transparenttextures.com/patterns/stardust.png") repeat;
+      opacity:0.25;
+      animation: twinkle 8s infinite alternate ease-in-out;
+      z-index:0;
+    }
+    @keyframes twinkle {
+      from { opacity:0.15; }
+      to   { opacity:0.35; }
+    }
+
+    .particle{
+      position: fixed;
+      will-change: transform, opacity;
+      user-select:none;
+      pointer-events:none;
+      z-index:20;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.4));
+    }
+
+    @keyframes fall {
+      0%   { transform: translateY(-10vh) scale(var(--s,1)) rotate(var(--r,0deg)); opacity:1; }
+      100% { transform: translateY(110vh) scale(var(--s,1)) rotate(calc(var(--r,0deg) + var(--dr,360deg))); opacity:0; }
+    }
+
+    @keyframes popUp {
+      0% { transform: translate(-50%,-50%) scale(0.5); opacity:1; }
+      100%{ transform: translate(calc(-50% + var(--dx,0px)), calc(-50% + var(--dy,0px))) scale(1.2); opacity:0; }
+    }
+
+    .center{
+      position:fixed; inset:0; display:grid; place-items:center; pointer-events:none; z-index:5;
+      font-size:clamp(32px, 6vw, 56px); font-weight:900; letter-spacing:2px;
+      text-shadow: 0 0 30px var(--accent3), 0 0 60px var(--accent2);
+      animation: pulse 2.8s infinite alternate;
+    }
+    @keyframes pulse {
+      from { opacity:.65; transform:scale(1); }
+      to   { opacity:1;   transform:scale(1.08); }
+    }
+  </style>
+</head>
+<body>
+  <div class="center">✨ Te Amo Sofi 💖 ✨</div>
+
+  <!-- Música -->
+  <audio id="musica" src="cancion1.mp3" preload="auto" loop></audio>
+
+  <script>
+    const musica = document.getElementById('musica');
+    let musicaIniciada = false;
+
+    const colores = ['#ff4d6d','#ff758f','#ffb3c1','#ff6b6b','#ff8fab','#ffc2d1'];
+    const simbolos = ['❤','💖','💕','💓','💞','Te Amo Sofi'];
+
+    function rand(min, max){ return Math.random() * (max - min) + min; }
+    function choice(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+    // Partículas que caen como lluvia
+    function crearParticulaLluvia(){
+      const el = document.createElement('span');
+      el.className = 'particle';
+      el.textContent = choice(simbolos);
+      el.style.fontSize = rand(18, 34) + 'px';
+      el.style.fontWeight = 800;
+      el.style.color = choice(colores);
+      el.style.left = rand(0, window.innerWidth) + 'px';
+      el.style.top  = '-50px';
+      el.style.setProperty('--s', rand(.8, 1.4));
+      el.style.setProperty('--r', rand(-30, 30) + 'deg');
+      el.style.setProperty('--dr', rand(90, 360) + 'deg');
+      el.style.animation = `fall ${rand(4, 7).toFixed(2)}s linear forwards`;
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
+
+    // Partículas extra al hacer clic/tocar
+    function crearExplosion(x,y){
+      for(let i=0; i<10; i++){
+        const el = document.createElement('span');
+        el.className = 'particle';
+        el.textContent = "Te Amo Sofi";
+        el.style.fontSize = rand(20, 36) + 'px';
+        el.style.fontWeight = 900;
+        el.style.color = choice(colores);
+        el.style.left = x + 'px';
+        el.style.top  = y + 'px';
+        el.style.setProperty('--dx', rand(-150, 150) + 'px');
+        el.style.setProperty('--dy', rand(-150, 150) + 'px');
+        el.style.animation = `popUp ${rand(1.5, 2.5).toFixed(2)}s ease-out forwards`;
+        document.body.appendChild(el);
+        el.addEventListener('animationend', () => el.remove());
+      }
+    }
+
+    // Lluvia infinita
+    setInterval(crearParticulaLluvia, 300);
+
+    // Evento de clic/touch → también inicia música
+    function pos(ev){
+      if(ev.touches && ev.touches[0]) return { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
+      return { x: ev.clientX, y: ev.clientY };
+    }
+    function activarMusica(){
+      if(!musicaIniciada){
+        musica.play().catch(()=>{});
+        musicaIniciada = true;
+      }
+    }
+    document.body.addEventListener('click', (e)=>{
+      activarMusica();
+      const {x,y} = pos(e);
+      crearExplosion(x,y);
+    });
+    document.body.addEventListener('touchstart', (e)=>{
+      activarMusica();
+      const {x,y} = pos(e);
+      crearExplosion(x,y);
+    }, {passive:true});
+  </script>
+</body>
+</html>
